@@ -1,10 +1,25 @@
-# Realtime Task Board · Web app
+<div align="center">
 
-A kanban board that stays in sync everywhere. Drag tasks between **To-Do**, **In Progress** and **Done**, set priorities and due dates, and watch every open tab or device update the moment something changes.
+# 🗂️ Realtime Task Board
 
-Live: [realtime-task-board-frontend.vercel.app](https://realtime-task-board-frontend.vercel.app/) (use a test account on the sign-in page)
+**Kanban board with drag and drop, live sync across devices and secure sign-in.**
 
-Backend repository: [realtime-task-board-backend](https://github.com/rudraprotapchakraborty/realtime-task-board-backend)
+[**Live demo**](https://realtime-task-board-frontend.vercel.app/) · [Backend API](https://github.com/rudraprotapchakraborty/realtime-task-board-backend) · [Portfolio](https://rudraprotapchakraborty.com/projects)
+
+![React](https://img.shields.io/badge/React-20232a?style=for-the-badge&logo=react&logoColor=61dafb) ![Vite](https://img.shields.io/badge/Vite-646cff?style=for-the-badge&logo=vite&logoColor=ffffff) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-0f172a?style=for-the-badge&logo=tailwindcss&logoColor=38bdf8) ![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socketdotio&logoColor=ffffff) ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=ffffff)
+
+<a href="https://realtime-task-board-frontend.vercel.app/"><img src="https://i.ibb.co/Hfqj4xDr/realtime-task-board.webp" alt="Realtime Task Board: home page" width="880"></a>
+
+</div>
+
+> The web app of **Task Board**.
+>
+> - To-Do, In Progress and Done columns with drag and drop by mouse, touch or keyboard
+> - Priority, due date and notes on every task
+> - Changes appear on every open tab instantly, with a polling fallback on serverless hosting
+> - Private board per member and an admin area
+
+A kanban board that stays in sync everywhere. Tasks live in To-Do, In Progress and Done columns that can be rearranged with a mouse, a finger or the keyboard, and every task carries a priority, an optional due date and a notes field. Changes made on one device show up on every other open tab straight away over WebSockets, with an automatic polling fallback on serverless hosting. Each member has a private board, and sign-in works with email and password (confirmed with a one-time email code) or Google, with password reset, an account settings page for name, photo, email and password, and an admin area for managing members. Shared test accounts for each role make the app easy to try, and the whole interface supports light and dark themes.
 
 ## Features
 
@@ -44,3 +59,11 @@ In development the dev server proxies `/api` and `/socket.io` to `http://127.0.0
 ## Deploying
 
 The project deploys as a static site (Vercel config included, with a rewrite to `index.html` for client side routing). Set `GOOGLE_CLIENT_ID` in the host's environment (and `VITE_API_URL` if the API lives somewhere else), and add the site's origin to the Google client's authorized JavaScript origins.
+
+---
+
+<div align="center">
+
+Made by **[Rudra Protap Chakraborty](https://rudraprotapchakraborty.com)** · [Portfolio](https://rudraprotapchakraborty.com) · [GitHub](https://github.com/rudraprotapchakraborty)
+
+</div>
