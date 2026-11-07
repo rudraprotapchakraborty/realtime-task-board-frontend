@@ -2,9 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="" />
+    <title>Task Board | Realtime Task Board</title>
+    <meta name="description" content="A realtime task board. Drag cards between To-Do, In Progress and Done and watch every open tab update instantly." />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Task Management</title>
+    <meta name="theme-color" content="#5b47e0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <script>
+      // Apply the saved theme before the first paint so there is no flash
+      try {
+        var t = localStorage.getItem("tb_theme");
+        if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) document.documentElement.classList.add("dark");
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

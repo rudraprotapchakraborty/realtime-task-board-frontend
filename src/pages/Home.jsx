@@ -1,221 +1,134 @@
-import { useState, useEffect } from "react";
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import Column from "../components/Column";
-import axios from "axios";
-import EditTaskModal from "../components/EditTaskModal";
-import DeleteTaskModal from "../components/DeleteTaskModal";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, ArrowUpRight, CalendarClock, GripVertical, KeyRound, Moon, Radio, ShieldCheck } from "lucide-react";
+import api from "../lib/api";
+import { useAuth } from "../context/AuthContext";
+import BoardArt from "../components/BoardArt";
 
-const Home = () => {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [editingTask, setEditingTask] = useState(null);
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    category: "To-Do",
-  });
-  const [showAddModal, setShowAddModal] = useState(false);
-  const openEditModal = (task) => setEditingTask(task);
-  const openDeleteConfirm = (taskId) => setDeleteConfirm(taskId);
+const features = [
+  { icon: GripVertical, title: "Drag and drop", text: "Move cards between To-Do, In Progress and Done, or reorder them inside a column. Works with a mouse, a finger and the keyboard." },
+  { icon: Radio, title: "Realtime sync", text: "Change a task on your phone and your laptop updates by itself. No refreshing, no stale boards." },
+  { icon: CalendarClock, title: "Priorities and due dates", text: "Mark what is urgent, set a day and see what is overdue at a glance." },
+  { icon: ShieldCheck, title: "Private by default", text: "Every board belongs to its owner. Sign in with Google or email, confirmed with a one-time code." },
+  { icon: KeyRound, title: "Account you control", text: "Change your name, photo, email or password, reset a forgotten password, or delete everything in one place." },
+  { icon: Moon, title: "Light and dark", text: "Easy on the eyes at any hour, and it remembers your choice." },
+];
 
-  // Fetch tasks from backend
-  const fetchTasks = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(
-        "https://task-management-server-production-c1e0.up.railway.app/tasks"
-      );
-      setTasks(res.data);
-    } catch {
-      setError("Failed to fetch tasks. Please try again.");
-    }
-    setLoading(false);
-  };
+const steps = [
+  ["Create a free account", "Use Google or your email. A six digit code confirms the address."],
+  ["Add your tasks", "Give each one a title, a priority and, if it matters, a due date."],
+  ["Move them to done", "Drag cards across the board. Every open tab shows the change straight away."],
+];
+
+export default function Home() {
+  const { user } = useAuth();
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    fetchTasks();
+    api.get("/public/stats").then((res) => setStats(res.data.data)).catch(() => {});
   }, []);
 
-  // Drag & Drop Handler
-  const onDragEnd = async (event) => {
-    const { active, over } = event;
-
-    // If no 'over' item or dragging over itself, do nothing
-    if (!over || active.id === over.id) return;
-
-    // Find indices of active and over tasks in the tasks array
-    const activeIndex = tasks.findIndex((t) => t._id === active.id);
-    const overIndex = tasks.findIndex((t) => t._id === over.id);
-
-    // Safety check: ensure both tasks exist
-    if (activeIndex === -1 || overIndex === -1) return;
-
-    const activeTask = tasks[activeIndex];
-    const overTask = tasks[overIndex];
-
-    // Create a new tasks array to avoid mutating state directly
-    let newTasks = [...tasks];
-
-    // Check if categories differ (moving between columns)
-    if (activeTask.category !== overTask.category) {
-      // Update the category of the active task to match the over task's category
-      newTasks[activeIndex] = { ...activeTask, category: overTask.category };
-    }
-
-    // Reorder the tasks array by moving the active task to the over task's position
-    newTasks = arrayMove(newTasks, activeIndex, overIndex);
-
-    // Update the state with the new tasks array
-    setTasks(newTasks);
-
-    // If the category changed, update the backend
-    if (activeTask.category !== overTask.category) {
-      try {
-        await axios.put(
-          `https://task-management-server-production-c1e0.up.railway.app/tasks/${active.id}`,
-          { category: overTask.category }
-        );
-      } catch (error) {
-        console.error(
-          "Error updating task category:",
-          error.response?.data || error.message
-        );
-      }
-    }
-  };
-
-  const addTask = async () => {
-    if (!newTask.title.trim()) return alert("Task title cannot be empty.");
-  
-    try {
-      await axios.post(
-        "https://task-management-server-production-c1e0.up.railway.app/tasks",
-        newTask
-      );
-  
-      setShowAddModal(false); // Close the modal after adding
-      setNewTask({ title: "", description: "", category: "To-Do" }); // Reset form
-  
-      await fetchTasks(); // Immediately refetch tasks from the backend
-    } catch (error) {
-      console.error("Error adding task:", error.response?.data || error.message);
-    }
-  };
-  
-
   return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex flex-col items-center p-6">
-        <h1 className="text-3xl font-bold mb-6">Task Management Board</h1>
-
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 bg-purple-600 text-white rounded mb-4"
-        >
-          + Add Task
-        </button>
-
-        {loading ? (
-          <p className="text-gray-500 dark:text-gray-400">Loading tasks...</p>
-        ) : error ? (
-          <p className="text-red-500 dark:text-red-400">{error}</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
-            {["To-Do", "In Progress", "Done"].map((category) => (
-              <SortableContext
-                key={category}
-                items={tasks
-                  .filter((t) => t.category === category)
-                  .map((t) => t._id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <Column
-                  title={category}
-                  tasks={tasks.filter((task) => task.category === category)}
-                  onEdit={openEditModal}
-                  onDelete={openDeleteConfirm}
-                  data={{ category }} // Pass the category to help in drag detection
-                />
-              </SortableContext>
-            ))}
+    <>
+      <section className="frame grid items-center gap-12 pb-20 pt-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:pt-20">
+        <div className="hero-stagger">
+          <span className="eyeline">Realtime task board</span>
+          <h1 className="display mt-5 text-[clamp(42px,6.4vw,84px)]">
+            Plan the day. Move it to <span className="accent">done</span>.
+          </h1>
+          <p className="mt-6 max-w-[520px] text-[17px] leading-relaxed text-muted">
+            A calm kanban board that stays in sync everywhere. Drag tasks from To-Do to Done and watch every open tab and device update the moment you let go.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            {user ? (
+              <Link to="/board" className="btn btn-primary">
+                Open your board <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            ) : (
+              <>
+                <Link to="/register" className="btn btn-primary">
+                  Create your board <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link to="/login" className="btn btn-ghost">
+                  Try a test account
+                </Link>
+              </>
+            )}
           </div>
-        )}
-      </div>
+          {stats && stats.members > 0 && (
+            <dl className="mt-10 flex flex-wrap gap-x-9 gap-y-4">
+              {[
+                ["Members", stats.members],
+                ["Tasks created", stats.created],
+                ["Tasks finished", stats.completed],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <dd className="text-3xl font-bold tracking-tight tabular-nums">{value.toLocaleString()}</dd>
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-muted">{label}</dt>
+                </div>
+              ))}
+            </dl>
+          )}
+        </div>
+        <BoardArt className="hero-stagger" />
+      </section>
 
-      {editingTask && (
-        <EditTaskModal
-          task={editingTask}
-          onClose={() => setEditingTask(null)}
-          onSave={fetchTasks}
-        />
-      )}
+      <section id="features" className="border-t border-line bg-surface/40 py-20" data-reveal>
+        <div className="frame">
+          <span className="eyeline">Features</span>
+          <h2 className="display mt-4 max-w-[640px] text-[clamp(32px,4.4vw,52px)]">
+            Everything a simple board needs, <span className="accent">nothing it does not</span>.
+          </h2>
+          <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map(({ icon: Icon, title, text }) => (
+              <li key={title} className="card p-6 transition-all hover:-translate-y-1 hover:border-brand hover:shadow-[var(--shadow)]">
+                <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-soft text-brand">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <h3 className="mt-5 text-lg font-bold tracking-tight">{title}</h3>
+                <p className="mt-2 text-[15px] leading-relaxed text-muted">{text}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
-      {deleteConfirm && (
-        <DeleteTaskModal
-          taskId={deleteConfirm} // Pass the task ID to delete
-          onClose={() => setDeleteConfirm(null)}
-          onConfirm={fetchTasks} // Refetch tasks after deletion
-        />
-      )}
+      <section id="how" className="py-20" data-reveal>
+        <div className="frame">
+          <span className="eyeline">How it works</span>
+          <h2 className="display mt-4 text-[clamp(32px,4.4vw,52px)]">
+            Three steps to a <span className="accent">clear head</span>.
+          </h2>
+          <ol className="mt-12 grid gap-5 md:grid-cols-3">
+            {steps.map(([title, text], i) => (
+              <li key={title} className="relative rounded-3xl border border-line p-7">
+                <span className="font-serif text-6xl italic leading-none text-brand">{i + 1}</span>
+                <h3 className="mt-4 text-lg font-bold tracking-tight">{title}</h3>
+                <p className="mt-2 text-[15px] leading-relaxed text-muted">{text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
 
-      {showAddModal && (
-        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-lg font-semibold">Add New Task</h2>
-            <input
-              type="text"
-              placeholder="Task Title"
-              className="w-full p-2 border rounded mt-3 bg-white dark:bg-gray-700 dark:text-white"
-              value={newTask.title}
-              onChange={(e) =>
-                setNewTask({ ...newTask, title: e.target.value })
-              }
-            />
-            <textarea
-              placeholder="Description"
-              className="w-full p-2 border rounded mt-3 bg-white dark:bg-gray-700 dark:text-white"
-              value={newTask.description}
-              onChange={(e) =>
-                setNewTask({ ...newTask, description: e.target.value })
-              }
-            />
-            <select
-              className="w-full p-2 border rounded mt-3 bg-white dark:bg-gray-700 dark:text-white"
-              value={newTask.category}
-              onChange={(e) =>
-                setNewTask({ ...newTask, category: e.target.value })
-              }
-            >
-              <option value="To-Do">To-Do</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Done">Done</option>
-            </select>
-            <div className="mt-4 flex justify-end gap-3">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={addTask}
-                className="px-4 py-2 bg-purple-600 text-white rounded"
-              >
-                Add Task
-              </button>
-            </div>
+      <section className="frame pb-24" data-reveal>
+        <div className="grid-panel rounded-[32px] border border-line px-6 py-14 text-center sm:px-12">
+          <h2 className="display mx-auto max-w-[640px] text-[clamp(30px,4vw,48px)]">
+            Ready to get things <span className="accent">moving</span>?
+          </h2>
+          <p className="mx-auto mt-4 max-w-[480px] text-muted">It is free, takes under a minute and your board is private from the first card.</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link to={user ? "/board" : "/register"} className="btn btn-primary">
+              {user ? "Open your board" : "Create your board"} <ArrowRight className="h-4 w-4" />
+            </Link>
+            {!user && (
+              <Link to="/login" className="btn btn-ghost">
+                Explore with a test account
+              </Link>
+            )}
           </div>
         </div>
-      )}
-    </DndContext>
+      </section>
+    </>
   );
-};
-
-export default Home;
+}

@@ -1,58 +1,44 @@
-# Task Management Application (Client-Side)
+# Realtime Task Board · Web app
 
-## 📌 Short Description
-A task management web application with drag-and-drop functionality for organizing tasks into different categories (To-Do, In Progress, Done). It includes real-time updates, Firebase authentication, and a responsive UI built with React and Tailwind CSS.
+A kanban board that stays in sync everywhere. Drag tasks between **To-Do**, **In Progress** and **Done**, set priorities and due dates, and watch every open tab or device update the moment something changes.
 
-## 🔗 Live Links
-- **Live Demo:** [Task Management App](https://task-management-2edae.web.app/)
-- **Backend Repository:** [GitHub](https://github.com/rudraprotapchakraborty/task-management-server)
+Backend repository: [realtime-task-board-backend](https://github.com/rudraprotapchakraborty/realtime-task-board-backend)
 
-## 📦 Dependencies
-The project requires the following dependencies:
+## Features
 
-- **React** (Frontend framework)
-- **Vite.js** (Build tool)
-- **@dnd-kit/core** (Drag-and-drop functionality)
-- **Axios** (HTTP requests)
-- **Firebase** (Authentication & real-time updates)
-- **Tailwind CSS** (Styling)
+- Drag and drop with mouse, touch and keyboard (`@dnd-kit`), including reordering inside a column
+- Realtime sync over WebSockets, with automatic fallback to polling on serverless hosting
+- Priorities, due dates, overdue highlighting, search and priority filter, "clear finished"
+- Email and password sign-in with a six digit email code, Google sign-in, forgot-password reset
+- Account settings: name, photo, email (confirmed by code), password, sign-in methods, delete account
+- Admin area: member list with search, block, role change and delete, plus board statistics
+- Light and dark mode, responsive down to phones, accessible dialogs and focus handling
+- Shared test accounts (Admin and User) on the sign-in page, locked so they cannot be changed
 
-## 🚀 Installation Steps
+## Stack
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/rudraprotapchakraborty/task-manager-client.git
-   ```
+React 19, Vite 8, Tailwind CSS 4, React Router 7, Axios, socket.io-client, `@dnd-kit`, lucide-react.
 
-2. **Navigate to the project directory:**
-   ```bash
-   cd task-manager-client
-   ```
+## Run it locally
 
-3. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+You need the [backend](https://github.com/rudraprotapchakraborty/realtime-task-board-backend) running on port 5000.
 
-4. **Create a `.env` file and add necessary environment variables (e.g., Firebase config, API URL).**
+```bash
+npm install
+cp .env.example .env.local   # then fill in GOOGLE_CLIENT_ID
+npm run dev                  # http://localhost:3000
+```
 
-5. **Start the development server:**
-   ```bash
-   npm run dev
-   ```
+In development the dev server proxies `/api` and `/socket.io` to `http://127.0.0.1:5000`.
 
-6. **Open the application in your browser:**
-   ```
-   http://localhost:5173
-   ```
+## Environment
 
-## 🛠️ Technologies Used
-- **Frontend:** React, Vite.js, Tailwind CSS
-- **State Management:** React Hooks
-- **Drag & Drop:** @dnd-kit/core
-- **Authentication:** Firebase
-- **API Requests:** Axios
-- **Backend:** Express.js, MongoDB (for API integration)
+| Variable | Purpose |
+| --- | --- |
+| `GOOGLE_CLIENT_ID` | Public Google OAuth client id. The button is hidden when it is empty. |
+| `VITE_API_URL` | Production only: API origin including `/api`, for example `https://your-api.vercel.app/api`. |
+| `VITE_SOCKET_URL` | Optional: WebSocket server origin. Leave empty on Vercel; the board polls instead. |
 
----
-Feel free to contribute, raise issues, or suggest improvements! 🚀
+## Deploying
+
+The project deploys as a static site (Vercel config included, with a rewrite to `index.html` for client side routing). Set `VITE_API_URL` and `GOOGLE_CLIENT_ID` in the host's environment, and add the site's origin to the Google client's authorized JavaScript origins.
