@@ -2,6 +2,8 @@
 
 A kanban board that stays in sync everywhere. Drag tasks between **To-Do**, **In Progress** and **Done**, set priorities and due dates, and watch every open tab or device update the moment something changes.
 
+Live: [realtime-task-board-frontend.vercel.app](https://realtime-task-board-frontend.vercel.app/) (use a test account on the sign-in page)
+
 Backend repository: [realtime-task-board-backend](https://github.com/rudraprotapchakraborty/realtime-task-board-backend)
 
 ## Features
@@ -36,9 +38,9 @@ In development the dev server proxies `/api` and `/socket.io` to `http://127.0.0
 | Variable | Purpose |
 | --- | --- |
 | `GOOGLE_CLIENT_ID` | Public Google OAuth client id. The button is hidden when it is empty. |
-| `VITE_API_URL` | Production only: API origin including `/api`, for example `https://your-api.vercel.app/api`. |
+| `VITE_API_URL` | Optional override of the API origin including `/api`. Production defaults to `https://realtime-task-board-backend.vercel.app/api`. |
 | `VITE_SOCKET_URL` | Optional: WebSocket server origin. Leave empty on Vercel; the board polls instead. |
 
 ## Deploying
 
-The project deploys as a static site (Vercel config included, with a rewrite to `index.html` for client side routing). Set `VITE_API_URL` and `GOOGLE_CLIENT_ID` in the host's environment, and add the site's origin to the Google client's authorized JavaScript origins.
+The project deploys as a static site (Vercel config included, with a rewrite to `index.html` for client side routing). Set `GOOGLE_CLIENT_ID` in the host's environment (and `VITE_API_URL` if the API lives somewhere else), and add the site's origin to the Google client's authorized JavaScript origins.

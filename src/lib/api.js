@@ -8,7 +8,8 @@ export const SESSION_EXPIRED_EVENT = "tb:session-expired";
 export const CLIENT_ID = Math.random().toString(36).slice(2, 12);
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api",
+  // Development goes through the Vite proxy; production talks to the deployed API unless VITE_API_URL says otherwise
+  baseURL: import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "/api" : "https://realtime-task-board-backend.vercel.app/api"),
   timeout: 20_000,
 });
 

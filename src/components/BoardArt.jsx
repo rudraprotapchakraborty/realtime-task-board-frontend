@@ -12,7 +12,7 @@ const Mini = ({ title, tag, tone, className = "", done }) => (
       </span>
       <p className={`text-[13px] font-semibold leading-snug text-ink ${done ? "line-through opacity-60" : ""}`}>{title}</p>
     </div>
-    <div className="mt-2.5 flex items-center gap-2">
+    <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
       <span className={`chip ${tone}`}>
         <Flag className="h-3 w-3" /> {tag}
       </span>
